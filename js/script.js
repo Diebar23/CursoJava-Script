@@ -1,112 +1,172 @@
-class Pelicula {
+//Fake Databases de Usuarios y Productos (En el mundo real esto está en una DB que es accedida a través del backend)
+const usuarios = [{
+    nombre: 'Diego',
+    mail: 'diegobarbas@mail.com',
+    pass: 'DB1234'
+},
+{
+    nombre: 'Camila',
+    mail: 'camiladr@mail.com',
+    pass: 'CDR1975'
+},
+{
+    nombre: 'pedro',
+    mail: 'pedrobere@mail.com',
+    pass: 'LaAcade2001'
+}]
 
-    constructor(titulo, director, anio, genero, valoracion, id) {
-        this.titulo = titulo;
-        this.director = director;
-        this.anio = parseInt(anio);
-        this.genero = genero;
-        this.valoracion = parseInt(valoracion);
-        this.id = id;
-    }
-
-    asignarId(array) {
-        this.id = array.length;
-    }
-
-    valorar(valoracion) {
-        this.valoracion = valoracion;
-    }
-
-
-}
-
-const peliculas = [
-    new Pelicula ('El Origen', 'Christopher Nolan', 2010, 'Ciencia Ficcion', 6, 1),
-    new Pelicula ('Avatar', 'James Cameron', 2009, 'Ciencia Ficcion', 10, 2),
-    new Pelicula ('Batman el Caballero de la noche', 'Christopher Nolan', 2208, 'Accion', 9, 3),
-    new Pelicula ('Bastardos sin Gloria', 'Quentin Tarantino', 2009, 'Comedia', 8, 4),
-    new Pelicula ('Gran Torino', 'Clint Eastwood', 2008, 'Drama', 7, 5),
-    new Pelicula ('La la land', 'Damien Chazelle', 2016, 'Musical', 8, 6),
-    new Pelicula ('El secreto de sus ojos', 'Juan Jose Campanella', 1937, 'Thriller', 10, 7)
-]
-
-console.log(peliculas);
-
-
-// Pedir que se ingresen Peliculas nuevas y sumarlas al array //
-let continuar = true;
-
-while (continuar) {
-    let ingreso = prompt('Ingresa los datos de la pelicula: titulo, director, año, género, puntaje de 1 a 10, separados por una barra diagonal (/). Ingresa X para finalizar');
-
-    if (ingreso.toUpperCase() == 'X') {
-        continuar = false;
-        break;
-    }
-
-    let datos = ingreso.split('/');
-    const pelicula = new Pelicula(datos[0], datos[1], datos[2], datos[3], datos[4]);
-
-    peliculas.push(pelicula);
-
-    pelicula.asignarId(peliculas);
-
-    console.log(peliculas)
-} 
+const productos = [{
+    nombre: "Hamburguesa Clasica",
+    marca: "Paty",
+    unidades: 4,
+    precio: 850,
+    img: './img/Hamburguesa Paty.jpg'
+}, {
+    nombre: "Hamburguesa Clasica",
+    marca: "Swift",
+    unidades: 4,
+    precio: 800,
+    img: './img/Hamburguesa Swift.jpg'
+}, {
+    nombre: "Medallon de Pollo",
+    marca: "Swift",
+    unidades: 4,
+    precio: 750,
+    img: './img/Medallon de pollo Swift.jpg'
+}, {
+    nombre: "Milanesa de Soja",
+    marca: "Swift",
+    unidades: 4,
+    precio: 700,
+    img: './img/Milanesa de soja Swift.jpg'
+}]
 
 
-// Ordenar el array de acuerdo a lo que se elija //
+//Todos los elementos del DOM que voy a necesitar
+const mailLogin = document.getElementById('emailLogin'),
+    passLogin = document.getElementById('passwordLogin'),
+    recordar = document.getElementById('recordarme'),
+    btnLogin = document.getElementById('login'),
+    modalEl = document.getElementById('modalLogin'),
+    modal = new bootstrap.Modal(modalEl),
+    contTarjetas = document.getElementById('tarjetas'),
+    toggles = document.querySelectorAll('.toggles');
 
-let criterio = prompt('Elegí el criterio deseado:\n1 - Título (A a Z) \n2 - Título (Z a A)\n3 - Mejor a peor puntuado \n4 - Fecha de publicación (Más viejo a más nuevo)');
+//La función de validar se aprovecha del tipo de return que hace el método find (el objeto si lo encuentra, o undefined si no encuentra ninguno que cumpla con la condición)
+function validarUsuario(usersDB, user, pass) {
+    let encontrado = usersDB.find((userDB) => userDB.mail == user);
 
-function ordenar(criterio, array) {
-    let arrayOrdenado = array.slice(0);
-
-
-    switch (criterio) {
-        case '1':
-            let nombreAscendente = arrayOrdenado.sort((a,b)=>a.titulo.localeCompare(b.titulo));
-            return nombreAscendente;
-        case '2':
-            let nombreDescendente = arrayOrdenado.sort((a, b) => b.titulo.localeCompare(a.titulo));
-            return nombreDescendente;
-        case '3':
-            return arrayOrdenado.sort((a, b) => b.valoracion - a.valoracion);
-        case '4':
-            return arrayOrdenado.sort((a, b) => a.anio - b.anio);
-        default:
-            alert('No es un criterio válido');
-            break;
+    //console.log('Usuario encontrado por validate '+ typeof isFound);
+    if (typeof encontrado === 'undefined') {
+        return false;
+    } else {
+        //si estoy en este punto, quiere decir que el mail existe, sólo queda comparar la contraseña
+        if (encontrado.pass != pass) {
+            return false;
+        } else {
+            return encontrado;
+        }
     }
 }
 
+//Guardamos los datos que recuperamos de la database en el storage
+function guardarDatos(usuarioDB, storage) {
+    const usuario = {
+        'name': usuarioDB.nombre,
+        'user': usuarioDB.mail,
+        'pass': usuarioDB.pass
+    }
 
-function crearStringResultado(array){
-    let info = '';
+    storage.setItem('usuario', JSON.stringify(usuario));
+}
 
-    array.forEach(elemento=>{
-        info += 'Título: ' + elemento.titulo + '\nDirector: ' + elemento.director + '\nAño de publicación: ' + elemento.anio + '\nValoración: ' + elemento.valoracion + ' puntos.\n\n'
-    })
+//Cambio el DOM para mostrar el nombre del usuario logueado, usando los datos del storage
+function saludar(usuario) {
+    nombreUsuario.innerHTML = `Bienvenido/a, <span>${usuario.name}</span>`
+}
 
-    return info;
+//Limpiar los storages
+function borrarDatos() {
+    localStorage.clear();
+    sessionStorage.clear();
+}
+
+//Recupero los datos que se guardaron y los retorno
+function recuperarUsuario(storage) {
+    let usuarioEnStorage = JSON.parse(storage.getItem('usuario'));
+    return usuarioEnStorage;
 }
 
 
-alert(crearStringResultado(ordenar(criterio,peliculas)));
+//Esta función revisa si hay un usuario guardado en el storage, y en ese caso evita todo el proceso de login 
+function estaLogueado(usuario) {
 
-
-
-// Filtrar Peliculas de acuerdo al director //
-let directorElegido = prompt('Escribí el nombre del director para que te mostremos sus peliculas');
-
-const filtrado = peliculas.filter((pelicula)=>pelicula.director.toLowerCase().includes(directorElegido.toLowerCase()))
-
-
-// Mostrar Peliculas filtradas de acuerdo al director //
-
-if (filtrado.length==0){
-    alert('Lo sentimos. No encontramos coincidencias en nuestro catálogo');
-}else{
-    const imprimible = filtrado.map((pelicula)=>pelicula.titulo);
-    alert('Las peliculas de nuestro catálogo, de directores que coinciden parcial o totalmente con esta búsqueda, son:\n- ' + imprimible.join('\n- '));
+    if (usuario) {
+        saludar(usuario);
+        mostrarInfoProducto(productos);
+        presentarInfo(toggles, 'd-none');
+    }
 }
+
+//Esta función nos permite intercambiar la visualización de los elementos del DOM, agregando o sacando la clase d-none. Si el elemento la tiene, se la saco, y si no la tiene, se la agrego. La gata Flora de las funciones sería.
+function presentarInfo(array, clase) {
+    array.forEach(element => {
+        element.classList.toggle(clase);
+    });
+}
+
+//Creo HTML dinámico para mostrar la información de los productos a partir del array fake DB
+function mostrarInfoProducto(array) {
+    contTarjetas.innerHTML = '';
+    array.forEach(element => {
+        let html = `<div class="card cardProducto" id="tarjeta${element.nombre}">
+                <h3 class="card-header" id="nombreProducto">Nombre: ${element.nombre}</h3>
+                <img src="${element.img}" alt="${element.nombre}" class="card-img-bottom" id="fotoProducto">
+                <div class="card-body">
+                    <p class="card-text" id="marcaProducto">Marca: ${element.marca}</p>
+                    <p class="card-text" id="unidadesProducto">Unidades: ${element.unidades}</p>
+                    <p class="card-text" id="precioProducto">Precio $: ${element.precio}</p>
+                </div>
+            </div>`;
+        contTarjetas.innerHTML += html;
+    });
+}
+
+//Eventos - Acciones de los botones
+btnLogin.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    //Validamos que ambos campos estén completos
+    // if (!mailLogin.value || !passLogin.value) {
+    //     alert('Todos los campos son requeridos');
+    // } else {
+        //Revisamos si el return de la función validate es un objeto o un boolean. Si es un objeto, fue una validación exitosa y usamos los datos. Si no, informamos por alert.
+        let data = validarUsuario(usuarios, mailLogin.value, passLogin.value);
+
+        if (!data) {
+            alert(`Usuario y/o contraseña erróneos`);
+        } else {
+
+            //Revisamos si elige guardar la info aunque se cierre el navegador o no
+            if (recordar.checked) {
+                guardarDatos(data, localStorage);
+                saludar(recuperarUsuario(localStorage));
+            } else {
+                guardarDatos(data, sessionStorage);
+                saludar(recuperarUsuario(sessionStorage));
+            }
+            //Recién ahora cierro el cuadro de login
+            modal.hide();
+            //Muestro la info para usuarios logueados
+            mostrarInfoProducto(productos);
+            presentarInfo(toggles, 'd-none');
+        }
+   // }
+});
+
+btnLogout.addEventListener('click', () => {
+    borrarDatos();
+    presentarInfo(toggles, 'd-none');
+});
+
+window.onload = () => estaLogueado(recuperarUsuario(localStorage)); 
