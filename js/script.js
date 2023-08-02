@@ -18,25 +18,21 @@ const usuarios = [{
 const productos = [{
     nombre: "Hamburguesa Clasica",
     marca: "Paty",
-    unidades: 4,
     precio: 850,
     img: './img/Hamburguesa Paty.jpg'
 }, {
     nombre: "Hamburguesa Clasica",
     marca: "Swift",
-    unidades: 4,
     precio: 800,
     img: './img/Hamburguesa Swift.jpg'
 }, {
     nombre: "Medallon de Pollo",
     marca: "Swift",
-    unidades: 4,
     precio: 750,
     img: './img/Medallon de pollo Swift.jpg'
 }, {
     nombre: "Milanesa de Soja",
     marca: "Swift",
-    unidades: 4,
     precio: 700,
     img: './img/Milanesa de soja Swift.jpg'
 }]
@@ -120,11 +116,10 @@ function mostrarInfoProducto(array) {
     contTarjetas.innerHTML = '';
     array.forEach(element => {
         let html = `<div class="card cardProducto" id="tarjeta${element.nombre}">
-                <h3 class="card-header" id="nombreProducto">Nombre: ${element.nombre}</h3>
+                <h3 class="card-header" id="nombreProducto">Producto: ${element.nombre}</h3>
                 <img src="${element.img}" alt="${element.nombre}" class="card-img-bottom" id="fotoProducto">
                 <div class="card-body">
                     <p class="card-text" id="marcaProducto">Marca: ${element.marca}</p>
-                    <p class="card-text" id="unidadesProducto">Unidades: ${element.unidades}</p>
                     <p class="card-text" id="precioProducto">Precio $: ${element.precio}</p>
                 </div>
             </div>`;
@@ -137,10 +132,8 @@ btnLogin.addEventListener('click', (e) => {
     e.preventDefault();
 
     //Validamos que ambos campos estén completos
-    // if (!mailLogin.value || !passLogin.value) {
-    //     alert('Todos los campos son requeridos');
-    // } else {
-        //Revisamos si el return de la función validate es un objeto o un boolean. Si es un objeto, fue una validación exitosa y usamos los datos. Si no, informamos por alert.
+    
+    //Revisamos si el return de la función validate es un objeto o un boolean. Si es un objeto, fue una validación exitosa y usamos los datos. Si no, informamos por alert.
         let data = validarUsuario(usuarios, mailLogin.value, passLogin.value);
 
         if (!data) {
@@ -161,8 +154,9 @@ btnLogin.addEventListener('click', (e) => {
             mostrarInfoProducto(productos);
             presentarInfo(toggles, 'd-none');
         }
-   // }
+
 });
+
 
 btnLogout.addEventListener('click', () => {
     borrarDatos();
@@ -170,3 +164,4 @@ btnLogout.addEventListener('click', () => {
 });
 
 window.onload = () => estaLogueado(recuperarUsuario(localStorage)); 
+
